@@ -50,10 +50,21 @@
     <div class="parallax"></div>
 
         <div class="row">
-            
+
+            <!--Barra de Busqueda-->
             <div class="col-12 mt-4">
                 <h2>Buscar Platillo</h2>
                 <input type="text" v-model="searchQuery" class="form-control" placeholder="Ingrese el nombre del platillo">
+            </div>
+
+            <!--Barra de progreso-->
+            <div class="col-12 mt-4">
+                <h2>Barra de Progreso</h2>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" :style="{ width: progressPercentage + '%' }">
+                        {{ progressPercentage.toFixed(0) }}%
+                    </div>
+                </div>
             </div>
 
             <div class="col-12 mt-4">
