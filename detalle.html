@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Platillo</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+    <header class="bg-gradient text-center text-white">
+        <span class="h2">Detalle del Platillo</span>
+    </header>
+
+    <section class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#" @click="goBack">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ meal?.strMeal }}</li>
+            </ol>
+        </nav>
+
+        <div v-if="meal" class="card">
+            <img :src="meal.strMealThumb" class="card-img-top" alt="Imagen del platillo">
+            <div class="card-body">
+                <h4 class="card-title">{{ meal.strMeal }}</h4>
+                <p><strong>Categoría:</strong> {{ meal.strCategory }}</p>
+                <p><strong>Región:</strong> {{ meal.strArea }}</p>
+                <p>{{ meal.strInstructions }}</p>
+                <p><strong>Precio:</strong> ${{ meal.price }}</p>
+                <div class="quantity-selector">
+                    <button class="btn btn-secondary" @click="updateQuantity(-1)" :disabled="quantity === 1">-</button>
+                    <span class="mx-2">{{ quantity }}</span>
+                    <button class="btn btn-secondary" @click="updateQuantity(1)" :disabled="quantity === 6">+</button>
+                </div>
+                <button class="btn btn-warning mt-3" @click="addToCart(meal, quantity)">Agregar al carrito</button>
+            </div>
+        </div>
+        <div v-else>
+            <p>Cargando detalles del platillo...</p>
+        </div>
+    </section>
+
+    <script src="js/vue3.js"></script>
+    <script src="js/axios.min.js"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    meal: null,
+                    quantity: 1
+                };
+            },
+            mounted() {
+                const mealData = JSON.parse(localStorage.getItem('selectedMeal'));
+                if (mealData) {
+                    this.meal = mealData;
+                }
+            },
+            methods: {
+                goBack() {
+                    window.history.back();
+                },
+                updateQuantity(value) {
+                    const newQuantity = this.quantity + value;
+                    if (newQuantity >= 1 && newQuantity <= 6) {
+                        this.quantity = newQuantity;
+                    }
+                },
+                addToCart(meal, quantity) {
+                    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                    const existingProduct = cart.find(item => item.idMeal === meal.idMeal);
+
+                    if (existingProduct) {
+                        existingProduct.quantity += quantity;
+                    } else {
+                        cart.push({ ...meal, quantity });
+                    }
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    alert("Producto agregado al carrito.");
+                },
+
+            }
+        });
+
+        app.mount('body');
+    </script>
+</body>
+</html>

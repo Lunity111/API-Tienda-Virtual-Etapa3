@@ -1,0 +1,74 @@
+    /* Fondo degradado del encabezado */
+    .bg-gradient {
+        background: linear-gradient(45deg, #f5c300, #f4b400);
+    }
+    header, footer {
+        padding: 20px 0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Sección principal */
+    #contenedor {
+        margin-top: 20px;
+    }
+    h2 {
+        color: #d4a017;
+    }
+    .form-select, .form-control {
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .form-select:hover, .form-control:hover {
+        border-color: #d4a017;
+    }
+
+    /* Estilo de tarjetas */
+    .card {
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    }
+    .card-img-top {
+        border-radius: 15px 15px 0 0;
+    }
+
+    /* Barra de progreso personalizada */
+    .progress-bar {
+        background-color: #d4a017;
+        transition: width 0.4s ease;
+    }
+
+    /* Estrellas personalizadas */
+    .stars {
+        color: #ffc107;
+        font-size: 1.2em;
+    }
+
+    /* Efecto Parallax */
+    .parallax {
+        background-image: url('images/food-banner.jpg');
+        height: 300px;
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    /* Animaciones con keyframes */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .card {
+        animation: fadeIn 0.8s ease-in-out;
+    }

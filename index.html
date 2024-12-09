@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platillos Típicos</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body >
+    <section class="container-fluid text-center" id="contenedor">
+
+    <header class="bg-gradient navbar navbar-expand-lg bg-mustard fixed-top shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white fw-bold" href="#">VMeal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSearch" aria-controls="navbarSearch" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSearch">
+                <form class="d-flex w-100 justify-content-between">
+                    <div class="input-group me-2">
+                        <label class="input-group-text bg-white text-dark" for="selectCountry">País</label>
+                        <select v-model="selectedCountry" @change="loadMealsByCountry" id="selectCountry" class="form-select border-radius">
+                            <option v-for="country in countries" :value="country.strArea" :key="country.strArea">
+                                {{ country.strArea }}
+                            </option>
+                        </select>
+                    </div>
+    
+                    <input type="text" v-model="searchQuery" class="form-control me-2 border-radius" placeholder="Buscar platillo...">
+    
+                    <div class="input-group">
+                        <label class="input-group-text bg-white text-dark" for="filterRating">Estrellas</label>
+                        <input type="number" v-model="selectedRating" id="filterRating" class="form-control border-radius" placeholder="1-5" min="1" max="5">
+                    </div>
+                </form>
+                <div>
+                    <!-- Botón de carrito -->
+                    <button class="btn btn-warning position-relative" @click="goToCart">
+                        🛒 Carrito
+                        <span v-if="totalItems > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ totalItems }}
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="parallax"></div>
+
+        <div class="row">
+            
+            <div class="col-12 mt-4">
+                <h2>Buscar Platillo</h2>
+                <input type="text" v-model="searchQuery" class="form-control" placeholder="Ingrese el nombre del platillo">
+            </div>
+
+            <div class="col-12 mt-4">
+                <h2>Platillos Típicos de {{ selectedCountry }}</h2>
+                <div v-if="visibleMeals.length" class="row">
+                    <div v-for="meal in visibleMeals" :key="meal.idMeal" class="col-12 col-md-4 mt-3">
+                        <div class="card">
+                            <img :src="meal.strMealThumb" alt="Imagen del platillo" class="card-img-top" @click="viewDetails(meal)">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ meal.strMeal }}</h5>
+                                <p class="card-text">
+                                    <strong>Región:</strong> {{ meal.strArea }}<br>
+                                    <strong>Categoría:</strong> {{ meal.strCategory }}<br>
+                                    <strong>Precio:</strong> ${{ meal.price }}<br>
+                                    <strong>Calificación:</strong>
+                                    <span class="stars" v-html="generateStars(meal.rating)"></span>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <button class="btn btn-warning mt-2" @click="viewDetails(meal)">Ver Más</button>
+                                        <button class="btn btn-warning" @click="addToCart(meal)">Agregar al carrito</button>
+                                    </div>
+                                </p>
+                            </div>
+                        </div>   
+                    </div>
+                </div>
+                <div v-else>
+                    <p>No se encontraron platillos con esa calificación.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gradient text-center text-white mt-4">
+        <span class="h2">Frameworks y APIs</span>
+    </footer>
+
+    <script src="js/vue3.js"></script>
+    <script src="js/axios.min.js"></script>
+    <script src="js/funciones.js"></script>
+</body>
+</html>

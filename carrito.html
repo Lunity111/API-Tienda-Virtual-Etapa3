@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+    <header class="bg-gradient text-center text-white">
+        <span class="h2">Carrito de Compras</span>
+    </header>
+
+    <section class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Carrito: {{ totalItems }} artículos</li>
+            </ol>
+        </nav>
+
+        <div v-if="cart.length" class="table-responsive">
+            <table class="table table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Importe</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in cart" :key="item.idMeal">
+                        <td><img :src="item.strMealThumb" alt="Imagen" class="img-thumbnail" style="width: 80px;"></td>
+                        <td>{{ item.strMeal }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" @click="updateItemQuantity(item, -1)" :disabled="item.quantity <= 1">-</button>
+                            {{ item.quantity }}
+                            <button class="btn btn-sm btn-secondary" @click="updateItemQuantity(item, 1)" :disabled="item.quantity >= 10">+</button>
+                        </td>
+                        <td>${{ item.price }}</td>
+                        <td>${{ item.price * item.quantity }}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" @click="removeItem(item)">Eliminar</button>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
+                        <td colspan="2">${{ subtotal }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" class="text-end"><strong>IVA (16%):</strong></td>
+                        <td colspan="2">${{ tax }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                        <td colspan="2">${{ total }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <button class="btn btn-success" @click="confirmPurchase">Realizar compra</button>
+            </div>
+        </div>
+        <div v-else>
+            <p>No hay productos en el carrito.</p>
+        </div>
+    </section>
+
+     <!-- Ventana emergente -->
+     <div v-if="showModal" class="modal-backdrop">
+        <div class="modal-content">
+            <h2 class="text-center">¿Confirmar compra?</h2>
+            <div class="d-flex justify-content-between mt-3">
+                <button class="btn btn-danger" @click="cancelPurchase">Cancelar</button>
+                <button class="btn btn-success" @click="completePurchase">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="js/vue3.js"></script>
+    <script src="js/axios.min.js"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    cart: [], // Contiene los productos del carrito
+                    showModal: false,
+                };
+            },
+            computed: {
+                totalItems() {
+                    return this.cart.reduce((acc, item) => acc + item.quantity, 0);
+                },
+                subtotal() {
+                    return this.cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+                },
+                tax() {
+                    return (this.subtotal * 0.16).toFixed(2); // IVA del 16%
+                },
+                total() {
+                    return (this.subtotal + parseFloat(this.tax)).toFixed(2);
+                }
+            },
+            methods: {
+                loadCart() {
+                    const storedCart = JSON.parse(localStorage.getItem('cart'));
+                    if (storedCart) {
+                        this.cart = storedCart.map(item => ({
+                            idMeal: item.idMeal,
+                            strMeal: item.strMeal || item.name,
+                            strMealThumb: item.strMealThumb || item.image,
+                            price: item.price,
+                            quantity: item.quantity || 1
+                        }));
+                    }
+                },
+                updateItemQuantity(item, change) {
+                    const product = this.cart.find(i => i.idMeal === item.idMeal);
+                    if (product) {
+                        product.quantity += change;
+                        if (product.quantity < 1) product.quantity = 1;
+                        if (product.quantity > 10) product.quantity = 10;
+                        this.saveCart();
+                    }
+                },
+                removeItem(item) {
+                    this.cart = this.cart.filter(i => i.idMeal !== item.idMeal);
+                    this.saveCart();
+                },
+                saveCart() {
+                    localStorage.setItem('cart', JSON.stringify(this.cart));
+                },
+                confirmPurchase() {
+                    this.showModal = true;
+                },
+                cancelPurchase() {
+                    this.showModal = false;
+                },
+                completePurchase() {
+                    this.cart = [];
+                    localStorage.removeItem('cart');
+                    this.showModal = false;
+                    const successMessage = document.createElement('div');
+                    successMessage.innerHTML = `
+                        <div class="alert alert-success text-center" role="alert">
+                            ¡Gracias por tu compra! Tu pedido se procesó con éxito.
+                        </div>
+                    `;
+                    document.body.appendChild(successMessage);
+                    setTimeout(() => successMessage.remove(), 3000);
+                },
+            },
+            mounted() {
+                this.loadCart();
+            },
+            watch: {
+                cart: {
+                    handler(newCart) {
+                        localStorage.setItem('cart', JSON.stringify(newCart));
+                    },
+                    deep: true
+                }
+            }
+        });
+
+        app.mount('body');
+    </script>
+    <style>
+        .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    }
+
+    .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    }
+    </style>
+</body>
+</html>
